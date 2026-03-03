@@ -5,10 +5,10 @@
 
 #include <NimBLEDevice.h>
 
-// ================= UART (desde Nodo 1) =================
+// ================= UART (from Node 1) =================
 static const uint32_t UART_BAUD = 115200;
 static const int UART_RX = D7;   // Expansion UART: RX-D7
-static const int UART_TX = D6;   // Expansion UART: TX-D6 (no necesario si solo recibes)
+static const int UART_TX = D6;   // Expansion UART: TX-D6 (Not necessary if only receive)
 
 // ================= PROTO FRAME V2 =================
 // [0]=0xAA [1]=TYPE [2..5]=timestamp(u32 LE) [6..9]=current(float LE) [10]=CRC8(frame[1..9])
@@ -24,7 +24,7 @@ static const uint8_t OLED_ADDR = 0x3C;
 Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, -1);
 
 // ================= BLE =================
-// UUIDs (puedes cambiarlos si quieres; mantenlos iguales en Nodo 3)
+// UUIDs (can change them if want; keep them the same in Node 3)
 static const char* BLE_DEVICE_NAME = "NODE2_BRIDGE";
 static const char* SERVICE_UUID    = "6e400001-b5a3-f393-e0a9-e50e24dcca9e";
 static const char* CHAR_UUID       = "6e400003-b5a3-f393-e0a9-e50e24dcca9e"; // Notify
@@ -42,7 +42,7 @@ class ServerCallbacks : public NimBLEServerCallbacks {
   }
 };
 
-// ================= CRC8 (igual que Nodo 1) =================
+// ================= CRC8 (same as Node 1) =================
 uint8_t crc8(const uint8_t *data, size_t len) {
   uint8_t crc = 0x00;
   for (size_t i = 0; i < len; i++) {
@@ -79,13 +79,13 @@ static void forwardBleRawFrame(const uint8_t* frame) {
 }
 
 static void handleFrame(const uint8_t* f) {
-  // Decodifica
+  // Decode
   memcpy(&lastTsMs, f + 2, 4);
   memcpy(&lastCurrentA, f + 6, 4);
 
   framesOk++;
 
-  // Reenvía por BLE (frame crudo de 11 bytes)
+  // Forward via BLE (raw 11-byte frame)
   forwardBleRawFrame(f);
 }
 
@@ -115,7 +115,7 @@ static void feedByte(uint8_t b) {
   if (crc_calc != crc_rx) {
     framesCrcErr++;
 
-    // Resync buscando START dentro del buffer
+    // Resync looking for START within the buffer
     int newStart = -1;
     for (int i = 1; i < (int)FRAME_LEN; i++) {
       if (buf[i] == START_BYTE) { newStart = i; break; }
@@ -146,7 +146,7 @@ static uint32_t lastOledMs = 0;
 static void oledInit() {
   Wire.begin(D4, D5); // SDA=D4, SCL=D5 (Expansion Board)
   if (!display.begin(SSD1306_SWITCHCAPVCC, OLED_ADDR)) {
-    // Si no hay OLED, seguimos sin bloquear
+    // If there's no OLED, we still can't block it.
     return;
   }
   display.clearDisplay();
@@ -158,7 +158,7 @@ static void oledInit() {
 }
 
 static void oledUpdate() {
-  if (!display.width()) return; // si no inicializó
+  if (!display.width()) return; // if not initialized
   display.clearDisplay();
   display.setCursor(0, 0);
 
