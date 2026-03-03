@@ -1,0 +1,11 @@
+## Project rules for contributions
+- Keep UART Frame Protocol V2 stable:
+  - START = 0xAA
+  - TYPE = 0x01 (current measurement)
+  - TIMESTAMP = uint32 little-endian (ms since boot)
+  - CURRENT = float32 IEEE754 little-endian (A)
+  - CRC8 polynomial 0x07 over bytes [1..9] (TYPE + payload)
+- Node 1 (SAMD21) must remain headless-boot friendly (no infinite wait on USB Serial).
+- UART receivers (Node 2/3) must be robust to byte loss: resync on START + CRC.
+- Any wiring/pin changes must be reflected in docs/wiring.md.
+- Prefer small PRs and keep sketches buildable with Arduino IDE.
